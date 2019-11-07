@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+message Auth {
+    string login = 1;
+    string password = 2;
+    string ip = 3;
+}
+
+service AntiBruteForceService {
+    rpc CheckAuth (CheckAuthRequest) returns (CheckAuthResponse) {
+    }
+    rpc AddToWhiteList (AddToWhiteListRequest) returns (AddToWhiteListResponse) {
+    }
+    rpc AddToBlackList (AddToBlackListRequest) returns (AddToBlackListResponse) {
+    }
+    rpc DeleteFromWhiteList (DeleteFromWhiteListRequest) returns (DeleteFromWhiteListResponse) {
+    }
+    rpc DeleteFromBlackList (DeleteFromBlackListRequest) returns (DeleteFromBlackListResponse) {
+    }
+    rpc ResetLimit (ResetLimitRequest) returns (ResetLimitResponse) {
+    }
+}
+
+message CheckAuthRequest {
+    Auth auth = 1;
+}
+
+message CheckAuthResponse {
+    oneof result {
+        bool ok = 1;
+        string error = 2;
+    }
+}
+
+message AddToWhiteListRequest {
+    string net = 1;
+}
+
+message AddToWhiteListResponse {
+    string error = 1;
+}
+
+message AddToBlackListRequest {
+    string net = 1;
+}
+
+message AddToBlackListResponse {
+    string error = 1;
+}
+
+message DeleteFromWhiteListRequest {
+    string net = 1;
+}
+
+message DeleteFromWhiteListResponse {
+    string error = 1;
+}
+
+message DeleteFromBlackListRequest {
+    string net = 1;
+}
+
+message DeleteFromBlackListResponse {
+    string error = 1;
+}
+
+message ResetLimitRequest {
+    string login = 1;
+    string ip = 2;
+}
+
+message ResetLimitResponse {
+    string error = 1;
+}
