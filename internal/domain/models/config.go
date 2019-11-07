@@ -1,6 +1,15 @@
 package models
 
-import "net"
+import (
+	"github.com/Brialius/antibruteforce/internal/domain/interfaces"
+	"net"
+)
+
+type Config struct {
+	WhiteList
+	BlackList
+	Storage *interfaces.ConfigStorage
+}
 
 type NetList struct {
 	Networks []*net.IPNet

@@ -9,8 +9,8 @@ GOPATH := $(shell go env GOPATH)
 GOOS := $(shell go env GOOS)
 BINSERVER=bin/server$(GOEXE)
 BINCLIENT=bin/client$(GOEXE)
-MODULESERVER=github.com/Brialius/calendar/cmd/server
-MODULECLIENT=github.com/Brialius/calendar/cmd/client
+MODULESERVER=github.com/Brialius/antibruteforce/cmd/server
+MODULECLIENT=github.com/Brialius/antibruteforce/cmd/client
 IMPORT_PATH := /usr/local/include
 LINT_PATH := ./bin/golangci-lint
 LINT_PATH_WIN := golangci-lint
@@ -54,7 +54,7 @@ generate:
 	protoc --go_out=plugins=grpc:internal/grpc api/api.proto -I $(IMPORT_PATH) -I .
 
 .PHONY: build
-build: clean mod-refresh build-server build-sender build-notificator build-client
+build: clean mod-refresh build-server build-client
 
 .PHONY: build-server
 build-server: mod-refresh ## Build a version
