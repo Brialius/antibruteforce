@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+	"github.com/Brialius/antibruteforce/internal/domain/models"
 	"github.com/Brialius/antibruteforce/internal/domain/services"
 	"github.com/Brialius/antibruteforce/internal/grpc/api"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
@@ -17,8 +18,22 @@ type AntiBruteForceServer struct {
 	AntiBruteForceService *services.AntiBruteForceService
 }
 
-func (a *AntiBruteForceServer) CheckAuth(context.Context, *api.CheckAuthRequest) (*api.CheckAuthResponse, error) {
-	panic("implement me")
+func (a *AntiBruteForceServer) CheckAuth(ctx context.Context, req *api.CheckAuthRequest) (*api.CheckAuthResponse, error) {
+	log.Printf("Hello there")
+	ip := net.ParseIP(req.GetAuth().GetIp())
+	ok, err := a.AntiBruteForceService.CheckAuth(ctx, &models.Auth{
+		Login:    req.GetAuth().GetLogin(),
+		Password: req.GetAuth().GetPassword(),
+		IpAddr:   ip,
+	})
+	if err != nil {
+		return &api.CheckAuthResponse{
+			Result: &api.CheckAuthResponse_Error{Error: "check error"},
+		}, nil
+	}
+	return &api.CheckAuthResponse{
+		Result: &api.CheckAuthResponse_Ok{Ok: ok},
+	}, nil
 }
 
 func (a *AntiBruteForceServer) AddToWhiteList(context.Context, *api.AddToWhiteListRequest) (*api.AddToWhiteListResponse, error) {

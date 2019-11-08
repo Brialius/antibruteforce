@@ -16,11 +16,11 @@ func (m MapBucketStorage) CreateBucket(ctx context.Context, id string, rateLimit
 	panic("implement me")
 }
 
-func (m MapBucketStorage) DeleteBucket(ctx context.Context, id string, rateLimit int) error {
+func (m MapBucketStorage) DeleteBucket(ctx context.Context, id string) error {
 	panic("implement me")
 }
 
-func (m MapBucketStorage) GetBucket(ctx context.Context, id string, rateLimit int) (*models.Bucket, error) {
+func (m MapBucketStorage) GetBucket(ctx context.Context, id string) (*models.Bucket, error) {
 	panic("implement me")
 }
 
