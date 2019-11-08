@@ -35,5 +35,5 @@ func (m MapConfigStorage) DeleteFromWhiteList(ctx context.Context, net net.IPNet
 }
 
 func (m MapConfigStorage) Close(ctx context.Context) {
-	panic("implement me")
+	//panic("implement me")
 }

@@ -16,6 +16,7 @@ import (
 )
 
 func selectConfigStorage(storageType, dsn string) (interfaces.ConfigStorage, error) {
+	_ = dsn
 	if storageType == "map" {
 		eventStorage := storage.NewMapConfigStorage()
 		return eventStorage, nil
