@@ -15,7 +15,7 @@ func SetConfig() {
 			log.Fatal(err)
 		}
 		viper.AddConfigPath(home)
-		viper.SetConfigName("calendar")
+		viper.SetConfigName("antibruteforce")
 	}
 
 	viper.AutomaticEnv()

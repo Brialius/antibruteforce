@@ -13,7 +13,7 @@ type StorageConfig struct {
 func GetStorageConfig() *StorageConfig {
 	log.Println("Configuring storage...")
 	viper.SetDefault("dsn", "")
-	viper.SetDefault("storage", "")
+	viper.SetDefault("storage", "map")
 	return newDbConfig()
 }
 

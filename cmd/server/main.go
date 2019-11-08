@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/Brialius/antibruteforce/internal/config"
 	"github.com/Brialius/antibruteforce/internal/domain/interfaces"
+	"github.com/Brialius/antibruteforce/internal/domain/services"
 	"github.com/Brialius/antibruteforce/internal/grpc"
 	"github.com/Brialius/antibruteforce/internal/monitoring"
 	"github.com/Brialius/antibruteforce/internal/storage"
@@ -14,10 +15,10 @@ import (
 	"log"
 )
 
-func selectStorage(storageType, dsn string) (interfaces.ConfigStorage, error) {
-	if storageType == "redis" {
-		eventStorage, err := storage.NewRedisStorage(dsn)
-		return eventStorage, err
+func selectConfigStorage(storageType, dsn string) (interfaces.ConfigStorage, error) {
+	if storageType == "map" {
+		eventStorage := storage.NewMapConfigStorage()
+		return eventStorage, nil
 	}
 	return nil, errors.Errorf("storage `%s` is not implemented", storageType)
 }
@@ -37,10 +38,6 @@ var RootCmd = &cobra.Command{
 			isAbsentParam = true
 			log.Println("Port is not set")
 		}
-		if storageConfig.Dsn == "" {
-			isAbsentParam = true
-			log.Println("Dsn is not set")
-		}
 		if storageConfig.StorageType == "" {
 			isAbsentParam = true
 			log.Println("StorageType is not set")
@@ -49,13 +46,16 @@ var RootCmd = &cobra.Command{
 			log.Fatal("Some parameters is not set")
 		}
 
-		storage, err := selectStorage(storageConfig.StorageType, storageConfig.Dsn)
+		configStorage, err := selectConfigStorage(storageConfig.StorageType, storageConfig.Dsn)
 		if err != nil {
 			log.Fatal(err)
 		}
-		defer storage.Close(context.Background())
+		defer configStorage.Close(context.Background())
 
-		server := grpc.NewAntiBruteForceServer()
+		service := services.NewAntiBruteForceService(storage.NewMapBucketStorage(), configStorage,
+			serverConfig.LoginLimit, serverConfig.PasswordLimit, serverConfig.IpLimit)
+
+		server := grpc.NewAntiBruteForceServer(service)
 		addr := fmt.Sprintf("%s:%s", serverConfig.Host, serverConfig.Port)
 		m := &monitoring.PrometheusService{
 			Port: serverConfig.MetricsPort,
@@ -82,10 +82,16 @@ func init() {
 	RootCmd.Flags().IntP("port", "p", 0, "port to listen")
 	RootCmd.Flags().StringP("dsn", "d", "", "database connection string")
 	RootCmd.Flags().StringP("storage", "s", "", "storage type")
+	RootCmd.Flags().IntP("login-limit", "l", 10, "login rate limit per minute")
+	RootCmd.Flags().IntP("password-limit", "w", 100, "password rate limit per minute")
+	RootCmd.Flags().IntP("ip-limit", "i", 1000, "ip rate limit per minute")
 	_ = viper.BindPFlag("grpc-srv-host", RootCmd.Flags().Lookup("host"))
 	_ = viper.BindPFlag("grpc-srv-port", RootCmd.Flags().Lookup("port"))
 	_ = viper.BindPFlag("dsn", RootCmd.Flags().Lookup("dsn"))
 	_ = viper.BindPFlag("storage", RootCmd.Flags().Lookup("storage"))
+	_ = viper.BindPFlag("login-limit", RootCmd.Flags().Lookup("login-limit"))
+	_ = viper.BindPFlag("password-limit", RootCmd.Flags().Lookup("password-limit"))
+	_ = viper.BindPFlag("ip-limit", RootCmd.Flags().Lookup("ip-limit"))
 }
 
 var (
