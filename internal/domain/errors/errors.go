@@ -7,5 +7,7 @@ func (a AntiBruteForceError) Error() string {
 }
 
 var (
-	ErrNotFound = AntiBruteForceError("record not found")
+	ErrNotFound    = AntiBruteForceError("record not found")
+	ErrInvalidIP   = AntiBruteForceError("invalid IP address")
+	ErrInvalidCIDR = AntiBruteForceError("invalid CIDR")
 )

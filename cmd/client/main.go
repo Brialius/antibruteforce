@@ -19,42 +19,13 @@ const ReqTimeout = time.Second * 10
 
 func newGrpcClient(ctx context.Context, host string, port string) api.AntiBruteForceServiceClient {
 	server := fmt.Sprintf("%s:%s", host, port)
+
 	conn, err := grpc.DialContext(ctx, server, grpc.WithInsecure(), grpc.WithUserAgent("antibruteforce client"))
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	return api.NewAntiBruteForceServiceClient(conn)
-}
-
-func checkAuth(ctx context.Context) {
-	resp, err := grpcClient.CheckAuth(ctx, &api.CheckAuthRequest{
-		Auth: &api.Auth{
-			Login:    grpcConfig.Login,
-			Password: grpcConfig.Password,
-			Ip:       grpcConfig.Ip,
-		},
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("Check error: %v", resp.GetError())
-	fmt.Printf("Check result: %v", resp.GetOk())
-}
-
-func addToWhiteList(ctx context.Context) {
-	panic("implement me")
-}
-
-func addToBlackList(ctx context.Context) {
-	panic("implement me")
-}
-
-func deleteFromWhiteList(ctx context.Context) {
-	panic("implement me")
-}
-
-func deleteFromBlackList(ctx context.Context) {
-	panic("implement me")
 }
 
 func resetLimit(ctx context.Context) {
@@ -62,10 +33,11 @@ func resetLimit(ctx context.Context) {
 }
 
 var RootCmd = &cobra.Command{
-	Use:       "client [check, reset, allow, disallow, block, unblock]",
-	Short:     "Run gRPC client",
-	ValidArgs: []string{"check", "reset", "allow", "disallow", "block", "unblock"},
-	Args:      cobra.ExactValidArgs(1),
+	Use:   "client [check, reset, add-to-whitelist, del-from-whitelist, add-to-blacklist, del-from-blacklist]",
+	Short: "Run gRPC client",
+	ValidArgs: []string{"check", "reset", "add-to-whitelist",
+		"del-from-whitelist", "add-to-blacklist", "del-from-blacklist"},
+	Args: cobra.ExactValidArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		grpcConfig = config.GetGrpcClientConfig()
 		ctx, cancel := context.WithTimeout(context.Background(), ReqTimeout)
@@ -106,6 +78,9 @@ func init() {
 	// bind flags to viper
 	_ = viper.BindPFlag("grpc-cli-host", RootCmd.Flags().Lookup("host"))
 	_ = viper.BindPFlag("grpc-cli-port", RootCmd.Flags().Lookup("port"))
+	_ = viper.BindPFlag("login", RootCmd.Flags().Lookup("login"))
+	_ = viper.BindPFlag("password", RootCmd.Flags().Lookup("password"))
+	_ = viper.BindPFlag("ip", RootCmd.Flags().Lookup("ip"))
 }
 
 var (
