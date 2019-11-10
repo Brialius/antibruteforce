@@ -2,8 +2,10 @@ package services
 
 import (
 	"context"
+	"github.com/Brialius/antibruteforce/internal/domain/errors"
 	"github.com/Brialius/antibruteforce/internal/domain/interfaces"
 	"github.com/Brialius/antibruteforce/internal/domain/models"
+	"github.com/Brialius/antibruteforce/internal/leakybucket"
 	"log"
 	"net"
 )
@@ -11,13 +13,13 @@ import (
 type AntiBruteForceService struct {
 	BucketStorage interfaces.BucketStorage
 	ConfigStorage interfaces.ConfigStorage
-	LoginLimit    int
-	PasswordLimit int
-	IpLimit       int
+	LoginLimit    uint64
+	PasswordLimit uint64
+	IpLimit       uint64
 }
 
 func NewAntiBruteForceService(bucketStorage interfaces.BucketStorage, configStorage interfaces.ConfigStorage,
-	loginLimit int, passwordLimit int, ipLimit int) *AntiBruteForceService {
+	loginLimit uint64, passwordLimit uint64, ipLimit uint64) *AntiBruteForceService {
 	return &AntiBruteForceService{
 		BucketStorage: bucketStorage,
 		ConfigStorage: configStorage,
@@ -28,8 +30,55 @@ func NewAntiBruteForceService(bucketStorage interfaces.BucketStorage, configStor
 }
 
 func (a *AntiBruteForceService) CheckAuth(ctx context.Context, auth *models.Auth) (bool, error) {
-	res := a.ConfigStorage.CheckIP(ctx, auth.IpAddr)
-	return res, nil
+	if !a.ConfigStorage.CheckIP(ctx, auth.IpAddr) {
+		log.Printf("IP address `%s` is blocked", auth.IpAddr)
+		return false, nil
+	}
+	ok, err := a.CheckBucketLimit(ctx, "ip_"+auth.IpAddr.String(), a.IpLimit)
+	if err != nil {
+		return false, err
+	}
+	if !ok {
+		log.Printf("IP address `%s` limit is exceeded", auth.IpAddr)
+		return false, nil
+	}
+	ok, err = a.CheckBucketLimit(ctx, "login_"+auth.Login, a.LoginLimit)
+	if err != nil {
+		return false, err
+	}
+	if !ok {
+		log.Printf("Login `%s` limit is exceeded", auth.Login)
+		return false, nil
+	}
+	ok, err = a.CheckBucketLimit(ctx, "password_"+auth.Password, a.PasswordLimit)
+	if err != nil {
+		return false, err
+	}
+	if !ok {
+		log.Printf("Password `%s` limit is exceeded", auth.Password)
+		return false, nil
+	}
+	return true, nil
+}
+
+func (a *AntiBruteForceService) CheckBucketLimit(ctx context.Context, id string, rate uint64) (bool, error) {
+	b, err := a.BucketStorage.GetBucket(ctx, id)
+	if err != nil {
+		if err != errors.ErrBucketNotFound {
+			log.Printf("Can't get bucket `%s`: %s", id, err)
+			return false, err
+		}
+		log.Printf("Bucket `%s` doesn't exist, creating..", id)
+		if err := a.BucketStorage.CreateBucket(ctx, id, rate, leakybucket.NewBucket(id, rate)); err != nil {
+			log.Printf("Can't create bucket `%s`: %s", id, err)
+			return false, err
+		}
+		b, err = a.BucketStorage.GetBucket(ctx, id)
+		if err != nil {
+			return false, err
+		}
+	}
+	return b.CheckLimit(ctx), err
 }
 
 func (a *AntiBruteForceService) AddToWhiteList(ctx context.Context, n *net.IPNet) error {

@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/Brialius/antibruteforce/internal/grpc/api"
 	"log"
-	"strings"
 )
 
 func checkAuth(ctx context.Context) {
@@ -27,11 +26,6 @@ func checkAuth(ctx context.Context) {
 
 	if isAbsentParam {
 		log.Fatal("Some parameters is not set")
-	}
-
-	if !strings.Contains(grpcConfig.Ip, "/") {
-		log.Printf("`%s` doesn't contain network specificator, seting it for single IP..", grpcConfig.Ip)
-		grpcConfig.Ip += "/32"
 	}
 
 	resp, err := grpcClient.CheckAuth(ctx, &api.CheckAuthRequest{
