@@ -5,5 +5,5 @@ import (
 )
 
 type NetList struct {
-	Networks []*net.IPNet
+	Networks map[string]*net.IPNet
 }

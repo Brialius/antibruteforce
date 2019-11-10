@@ -19,7 +19,7 @@ const ReqTimeout = time.Second * 10
 
 func newGrpcClient(ctx context.Context, host string, port string) api.AntiBruteForceServiceClient {
 	server := fmt.Sprintf("%s:%s", host, port)
-	conn, err := grpc.DialContext(ctx, server, grpc.WithInsecure(), grpc.WithUserAgent("calendar client"))
+	conn, err := grpc.DialContext(ctx, server, grpc.WithInsecure(), grpc.WithUserAgent("antibruteforce client"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -116,7 +116,7 @@ var (
 )
 
 func main() {
-	log.Printf("Started calendar gRPC client %s-%s", version, build)
+	log.Printf("Started antibruteforce gRPC client %s-%s", version, build)
 
 	if err := RootCmd.Execute(); err != nil {
 		log.Fatal(err)

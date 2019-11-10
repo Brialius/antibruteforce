@@ -4,6 +4,8 @@ import (
 	"context"
 	"github.com/Brialius/antibruteforce/internal/domain/interfaces"
 	"github.com/Brialius/antibruteforce/internal/domain/models"
+	"log"
+	"net"
 )
 
 type AntiBruteForceService struct {
@@ -26,6 +28,46 @@ func NewAntiBruteForceService(bucketStorage interfaces.BucketStorage, configStor
 }
 
 func (a *AntiBruteForceService) CheckAuth(ctx context.Context, auth *models.Auth) (bool, error) {
-	//TODO: Implement
-	return false, nil
+	res := a.ConfigStorage.CheckIP(ctx, auth.IpAddr)
+	return res, nil
+}
+
+func (a *AntiBruteForceService) AddToWhiteList(ctx context.Context, n *net.IPNet) error {
+	log.Printf("Adding %s to whitelist", n)
+	err := a.ConfigStorage.AddToWhiteList(ctx, n)
+	if err != nil {
+		log.Printf("Adding %s to whitelist is failed: %s", n, err)
+	}
+	return err
+}
+
+func (a *AntiBruteForceService) AddToBlackList(ctx context.Context, n *net.IPNet) error {
+	log.Printf("Adding %s to blacklist", n)
+	err := a.ConfigStorage.AddToBlackList(ctx, n)
+	if err != nil {
+		log.Printf("Adding %s to blacklist is failed: %s", n, err)
+	}
+	return err
+}
+
+func (a *AntiBruteForceService) DeleteFromWhiteList(ctx context.Context, n *net.IPNet) error {
+	log.Printf("Deleting %s from whitelist", n)
+	err := a.ConfigStorage.DeleteFromWhiteList(ctx, n)
+	if err != nil {
+		log.Printf("Deleting %s from whitelist is failed: %s", n, err)
+	}
+	return err
+}
+
+func (a *AntiBruteForceService) DeleteFromBlackList(ctx context.Context, n *net.IPNet) error {
+	log.Printf("Deleting %s from blacklist", n)
+	err := a.ConfigStorage.DeleteFromBlackList(ctx, n)
+	if err != nil {
+		log.Printf("Deleting %s from blacklist is failed: %s", n, err)
+	}
+	return err
+}
+
+func (a *AntiBruteForceService) ResetLimit(ctx context.Context, login string, n *net.IPNet) error {
+	panic("implement me")
 }
