@@ -8,6 +8,12 @@ import (
 	"github.com/Brialius/antibruteforce/internal/leakybucket"
 	"log"
 	"net"
+	"time"
+)
+
+const (
+	duration       = time.Minute
+	inactiveCycles = 2
 )
 
 type AntiBruteForceService struct {
@@ -71,7 +77,8 @@ func (a *AntiBruteForceService) CheckBucketLimit(ctx context.Context, id string,
 			return false, err
 		}
 		log.Printf("Bucket `%s` doesn't exist, creating..", id)
-		if err := a.BucketStorage.SaveBucket(ctx, id, rate, leakybucket.NewBucket(id, rate)); err != nil {
+		if err := a.BucketStorage.SaveBucket(ctx, id, rate,
+			leakybucket.NewBucket(id, rate, duration, inactiveCycles)); err != nil {
 			log.Printf("Can't create bucket `%s`: %s", id, err)
 			return false, err
 		}

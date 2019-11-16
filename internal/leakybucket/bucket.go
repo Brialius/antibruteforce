@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -16,14 +17,16 @@ type Bucket struct {
 	done                chan struct{}
 	mu                  sync.RWMutex
 	once                sync.Once
+	duration            time.Duration
+	inactiveCycles      uint64
 }
 
 // Might be a parameter
 const inactiveCycles = 2
 
-func NewBucket(id string, rateLimit uint64) *Bucket {
+func NewBucket(id string, rateLimit uint64, duration time.Duration, inactiveCycles uint64) *Bucket {
 	return &Bucket{Id: id, rateLimit: rateLimit, waitTicksUntilPurge: inactiveCycles * rateLimit,
-		done: make(chan struct{}, 1), mu: sync.RWMutex{}}
+		done: make(chan struct{}, 1), mu: sync.RWMutex{}, duration: duration, inactiveCycles: inactiveCycles}
 }
 
 func (b *Bucket) Inactive(ctx context.Context) <-chan struct{} {
@@ -33,11 +36,12 @@ func (b *Bucket) Inactive(ctx context.Context) <-chan struct{} {
 func (b *Bucket) CheckLimit(ctx context.Context) bool {
 	b.mu.Lock()
 	defer b.mu.Unlock()
-	if b.requests == 0 {
-		b.requests += 1
+	if atomic.LoadUint64(&b.requests) == 0 {
+		atomic.AddUint64(&b.requests, 1)
 		b.once.Do(func() {
 			go func(bucket *Bucket) {
-				ticker := time.NewTicker(time.Duration(uint64(time.Minute) / b.rateLimit))
+				log.Printf("Goroutine for Id: %s is created", b.Id)
+				ticker := time.NewTicker(time.Duration(uint64(b.duration) / b.rateLimit))
 				defer ticker.Stop()
 				for {
 					<-ticker.C
@@ -51,12 +55,10 @@ func (b *Bucket) CheckLimit(ctx context.Context) bool {
 					b.mu.RUnlock()
 					b.mu.Lock()
 					if b.requests > 0 {
-						log.Printf("Id: %s, Requests: %d", b.Id, b.requests)
 						b.requests -= 1
 						b.waitTicks = 0
 					} else {
 						if b.waitTicks < b.waitTicksUntilPurge {
-							log.Printf("Id: %s, waitTicks: %d", b.Id, b.waitTicks)
 							b.waitTicks += 1
 						}
 					}

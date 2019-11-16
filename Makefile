@@ -47,7 +47,7 @@ lint: ## Run all the linters
 	$(LINT_PATH) run $(LINTERFLAGS) cmd/server
 
 .PHONY: ci
-ci: setup lint build ## Run all the tests and code checks
+ci: setup lint build test ## Run all the tests and code checks
 
 .PHONY: generate
 generate:
