@@ -18,8 +18,9 @@ type AntiBruteForceService struct {
 	IpLimit       uint64
 }
 
-func NewAntiBruteForceService(bucketStorage interfaces.BucketStorage, configStorage interfaces.ConfigStorage,
-	loginLimit uint64, passwordLimit uint64, ipLimit uint64) *AntiBruteForceService {
+func NewAntiBruteForceService(
+	bucketStorage interfaces.BucketStorage, configStorage interfaces.ConfigStorage, loginLimit uint64,
+	passwordLimit uint64, ipLimit uint64) *AntiBruteForceService {
 	return &AntiBruteForceService{
 		BucketStorage: bucketStorage,
 		ConfigStorage: configStorage,
@@ -34,31 +35,32 @@ func (a *AntiBruteForceService) CheckAuth(ctx context.Context, auth *models.Auth
 		log.Printf("IP address `%s` is blocked", auth.IpAddr)
 		return false, nil
 	}
+	res := true
 	ok, err := a.CheckBucketLimit(ctx, "ip_"+auth.IpAddr.String(), a.IpLimit)
 	if err != nil {
 		return false, err
 	}
 	if !ok {
-		log.Printf("IP address `%s` limit is exceeded", auth.IpAddr)
-		return false, nil
+		log.Printf("IP address `%s` requests rate limit is exceeded", auth.IpAddr)
+		res = false
 	}
 	ok, err = a.CheckBucketLimit(ctx, "login_"+auth.Login, a.LoginLimit)
 	if err != nil {
 		return false, err
 	}
 	if !ok {
-		log.Printf("Login `%s` limit is exceeded", auth.Login)
-		return false, nil
+		log.Printf("Login `%s` requests rate limit is exceeded", auth.Login)
+		res = false
 	}
 	ok, err = a.CheckBucketLimit(ctx, "password_"+auth.Password, a.PasswordLimit)
 	if err != nil {
 		return false, err
 	}
 	if !ok {
-		log.Printf("Password `%s` limit is exceeded", auth.Password)
-		return false, nil
+		log.Printf("Password `%s` requests rate limit is exceeded", auth.Password)
+		res = false
 	}
-	return true, nil
+	return res, nil
 }
 
 func (a *AntiBruteForceService) CheckBucketLimit(ctx context.Context, id string, rate uint64) (bool, error) {
@@ -69,7 +71,7 @@ func (a *AntiBruteForceService) CheckBucketLimit(ctx context.Context, id string,
 			return false, err
 		}
 		log.Printf("Bucket `%s` doesn't exist, creating..", id)
-		if err := a.BucketStorage.CreateBucket(ctx, id, rate, leakybucket.NewBucket(id, rate)); err != nil {
+		if err := a.BucketStorage.SaveBucket(ctx, id, rate, leakybucket.NewBucket(id, rate)); err != nil {
 			log.Printf("Can't create bucket `%s`: %s", id, err)
 			return false, err
 		}

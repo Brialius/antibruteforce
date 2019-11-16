@@ -13,7 +13,7 @@ type MapBucketStorage struct {
 	mu      sync.RWMutex
 }
 
-func (m MapBucketStorage) CreateBucket(ctx context.Context, id string, rateLimit uint64, bucket interfaces.Bucket) error {
+func (m MapBucketStorage) SaveBucket(ctx context.Context, id string, rateLimit uint64, bucket interfaces.Bucket) error {
 	m.mu.Lock()
 	m.Buckets[id] = bucket
 	m.mu.Unlock()
@@ -24,6 +24,7 @@ func (m MapBucketStorage) CreateBucket(ctx context.Context, id string, rateLimit
 		if err != nil {
 			log.Printf("Can't delete inactive bucket %s: %s", id, err)
 		}
+		log.Printf("Deleted inactive bucket %s", id)
 	}(ctx, m, id, bucket.Inactive(ctx))
 	return nil
 }

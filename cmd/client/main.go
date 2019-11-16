@@ -15,7 +15,10 @@ import (
 	"time"
 )
 
-const ReqTimeout = time.Second * 10
+const (
+	ReqTimeout = time.Second * 10
+	netMask    = "/32"
+)
 
 func newGrpcClient(ctx context.Context, host string, port string) api.AntiBruteForceServiceClient {
 	server := fmt.Sprintf("%s:%s", host, port)

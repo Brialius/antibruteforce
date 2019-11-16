@@ -14,7 +14,7 @@ func addToBlackList(ctx context.Context) {
 
 	if !strings.Contains(grpcConfig.Ip, "/") {
 		log.Printf("`%s` doesn't contain network specificator, seting it for single IP..", grpcConfig.Ip)
-		grpcConfig.Ip += "/32"
+		grpcConfig.Ip += netMask
 	}
 
 	resp, err := grpcClient.AddToBlackList(ctx, &api.AddToBlackListRequest{
