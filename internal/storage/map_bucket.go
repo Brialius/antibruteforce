@@ -34,7 +34,10 @@ func (m MapBucketStorage) DeleteBucket(ctx context.Context, id string) error {
 	if err != nil {
 		return err
 	}
+
+	m.mu.Lock()
 	delete(m.Buckets, id)
+	m.mu.Unlock()
 	return nil
 }
 

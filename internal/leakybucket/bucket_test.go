@@ -138,7 +138,7 @@ func TestBucket(t *testing.T) {
 				if !tt.wantTimeout {
 					t.Error("Bucket didn't finished in time")
 				}
-			case <-b.done:
+			case <-b.Inactive(ctx):
 			}
 
 			if passed != tt.want {
