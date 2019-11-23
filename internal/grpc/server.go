@@ -24,6 +24,7 @@ type AntiBruteForceServer struct {
 
 // CheckAuth gRPC wrapper for CheckAuth method
 func (a *AntiBruteForceServer) CheckAuth(ctx context.Context, req *api.CheckAuthRequest) (*api.CheckAuthResponse, error) {
+	apiCheckAuthCounter.WithLabelValues(req.GetAuth().GetIp(), req.GetAuth().GetLogin()).Inc()
 	ip := net.ParseIP(req.GetAuth().GetIp())
 	if ip == nil {
 		log.Printf("IP address is invalid: %s", req.GetAuth().GetIp())
@@ -41,6 +42,9 @@ func (a *AntiBruteForceServer) CheckAuth(ctx context.Context, req *api.CheckAuth
 	if err != nil {
 		log.Printf("Error during checking auth `%s`: %s", req.GetAuth(), err)
 		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if !ok {
+		apiCheckAuthBlockedCounter.WithLabelValues(req.GetAuth().GetIp(), req.GetAuth().GetLogin()).Inc()
 	}
 	return &api.CheckAuthResponse{
 		Result: &api.CheckAuthResponse_Ok{Ok: ok},
