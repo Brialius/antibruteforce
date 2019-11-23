@@ -31,10 +31,6 @@ func newGrpcClient(ctx context.Context, host string, port string) api.AntiBruteF
 	return api.NewAntiBruteForceServiceClient(conn)
 }
 
-func resetLimit(ctx context.Context) {
-	panic("implement me")
-}
-
 var RootCmd = &cobra.Command{
 	Use:   "client [check, reset, add-to-whitelist, del-from-whitelist, add-to-blacklist, del-from-blacklist]",
 	Short: "Run gRPC client",
