@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"github.com/Brialius/antibruteforce/internal/config"
 	"github.com/Brialius/antibruteforce/internal/domain/errors"
 	"github.com/Brialius/antibruteforce/internal/domain/interfaces"
 	"github.com/Brialius/antibruteforce/internal/domain/models"
@@ -41,7 +42,9 @@ func NewAntiBruteForceService(
 // CheckAuth Method to check limits for Auth
 func (a *AntiBruteForceService) CheckAuth(ctx context.Context, auth *models.Auth) (bool, error) {
 	if !a.ConfigStorage.CheckIP(ctx, auth.IPAddr) {
-		log.Printf("IP address `%s` is blocked", auth.IPAddr)
+		if config.Verbose {
+			log.Printf("IP address `%s` is blocked", auth.IPAddr)
+		}
 		return false, nil
 	}
 	res := true
@@ -50,7 +53,9 @@ func (a *AntiBruteForceService) CheckAuth(ctx context.Context, auth *models.Auth
 		return false, err
 	}
 	if !ok {
-		log.Printf("IP address `%s` requests rate limit is exceeded", auth.IPAddr)
+		if config.Verbose {
+			log.Printf("IP address `%s` requests rate limit is exceeded", auth.IPAddr)
+		}
 		res = false
 	}
 	ok, err = a.CheckBucketLimit(ctx, "login_"+auth.Login, a.LoginLimit)
@@ -58,7 +63,9 @@ func (a *AntiBruteForceService) CheckAuth(ctx context.Context, auth *models.Auth
 		return false, err
 	}
 	if !ok {
-		log.Printf("Login `%s` requests rate limit is exceeded", auth.Login)
+		if config.Verbose {
+			log.Printf("Login `%s` requests rate limit is exceeded", auth.Login)
+		}
 		res = false
 	}
 	ok, err = a.CheckBucketLimit(ctx, "password_"+auth.Password, a.PasswordLimit)
@@ -146,6 +153,8 @@ func (a *AntiBruteForceService) ResetLimit(ctx context.Context, login string, ip
 		return err
 	}
 	b.ResetLimit(ctx)
+	log.Printf("Limit for login `%s` has been reset ", login)
+
 	b, err = a.BucketStorage.GetBucket(ctx, "ip_"+ip.String())
 	if err != nil {
 		if err != errors.ErrBucketNotFound {
@@ -156,5 +165,6 @@ func (a *AntiBruteForceService) ResetLimit(ctx context.Context, login string, ip
 		return err
 	}
 	b.ResetLimit(ctx)
+	log.Printf("Limit for IP `%s` has been reset ", ip.String())
 	return nil
 }
