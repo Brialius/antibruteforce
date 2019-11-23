@@ -1,0 +1,17 @@
+# my global config
+global:
+  scrape_interval:     15s
+  evaluation_interval: 30s
+  # scrape_timeout is set to the global default (10s).
+
+  external_labels:
+    app: antibruteforce
+
+scrape_configs:
+  - job_name: antibruteforce-grpc-server
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - antibruteforce-service:9001
+      - labels:
+          service: grpc-server

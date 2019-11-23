@@ -1,0 +1,28 @@
+version: "3.2"
+services:
+  antibruteforce-service:
+    container_name: antibruteforce-grpc-server
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: antibruteforce-server
+    ports:
+      - "8080"
+    environment:
+      GRPC-SRV-HOST: "0.0.0.0"
+      GRPC-SRV-PORT: "8080"
+      DSN: ""
+      STORAGE: "map"
+      VERBOSE: "true"
+    command: "/app/server"
+    restart: on-failure
+
+  integration_tests:
+      image: antibruteforce-integration-tests
+      build:
+        context: .
+        dockerfile: Dockerfile-test
+      command: make integration-tests
+      depends_on:
+        - antibruteforce-service
+
