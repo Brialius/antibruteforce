@@ -2,8 +2,9 @@ package models
 
 import "net"
 
+// Auth domain model
 type Auth struct {
 	Login    string
 	Password string
-	IpAddr   net.IP
+	IPAddr   net.IP
 }

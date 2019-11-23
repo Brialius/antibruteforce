@@ -6,6 +6,7 @@ import (
 	"log"
 )
 
+// SetConfig Set config file settings and location
 func SetConfig() {
 	if viper.IsSet("config") {
 		viper.SetConfigFile(viper.GetString("config"))

@@ -8,17 +8,17 @@ import (
 )
 
 func deleteFromBlackList(ctx context.Context) {
-	if grpcConfig.Ip == "" {
-		log.Println("Ip is not set")
+	if grpcConfig.IP == "" {
+		log.Println("IP is not set")
 	}
 
-	if !strings.Contains(grpcConfig.Ip, "/") {
-		log.Printf("`%s` doesn't contain network specificator, seting it for single IP..", grpcConfig.Ip)
-		grpcConfig.Ip += netMask
+	if !strings.Contains(grpcConfig.IP, "/") {
+		log.Printf("`%s` doesn't contain network specificator, seting it for single IP..", grpcConfig.IP)
+		grpcConfig.IP += netMask
 	}
 
 	resp, err := grpcClient.DeleteFromBlackList(ctx, &api.DeleteFromBlackListRequest{
-		Net: grpcConfig.Ip,
+		Net: grpcConfig.IP,
 	})
 
 	if err != nil {

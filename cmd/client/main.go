@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	ReqTimeout = time.Second * 10
+	reqTimeout = time.Second * 10
 	netMask    = "/32"
 )
 
@@ -31,6 +31,7 @@ func newGrpcClient(ctx context.Context, host string, port string) api.AntiBruteF
 	return api.NewAntiBruteForceServiceClient(conn)
 }
 
+// RootCmd is the root cobra command for client
 var RootCmd = &cobra.Command{
 	Use:   "client [check, reset, add-to-whitelist, del-from-whitelist, add-to-blacklist, del-from-blacklist]",
 	Short: "Run gRPC client",
@@ -39,7 +40,7 @@ var RootCmd = &cobra.Command{
 	Args: cobra.ExactValidArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		grpcConfig = config.GetGrpcClientConfig()
-		ctx, cancel := context.WithTimeout(context.Background(), ReqTimeout)
+		ctx, cancel := context.WithTimeout(context.Background(), reqTimeout)
 		grpcClient = newGrpcClient(ctx, grpcConfig.Host, grpcConfig.Port)
 		go func() {
 			stop := make(chan os.Signal, 1)

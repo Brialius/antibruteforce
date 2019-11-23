@@ -4,6 +4,7 @@ import (
 	"context"
 )
 
+// BucketStorage Bucket storage interface
 type BucketStorage interface {
 	SaveBucket(ctx context.Context, id string, rateLimit uint64, bucket Bucket) error
 	DeleteBucket(ctx context.Context, id string) error

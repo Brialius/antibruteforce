@@ -17,10 +17,12 @@ import (
 	"syscall"
 )
 
+// AntiBruteForceServer struct
 type AntiBruteForceServer struct {
 	AntiBruteForceService *services.AntiBruteForceService
 }
 
+// CheckAuth gRPC wrapper for CheckAuth method
 func (a *AntiBruteForceServer) CheckAuth(ctx context.Context, req *api.CheckAuthRequest) (*api.CheckAuthResponse, error) {
 	ip := net.ParseIP(req.GetAuth().GetIp())
 	if ip == nil {
@@ -34,7 +36,7 @@ func (a *AntiBruteForceServer) CheckAuth(ctx context.Context, req *api.CheckAuth
 	ok, err := a.AntiBruteForceService.CheckAuth(ctx, &models.Auth{
 		Login:    req.GetAuth().GetLogin(),
 		Password: req.GetAuth().GetPassword(),
-		IpAddr:   ip,
+		IPAddr:   ip,
 	})
 	if err != nil {
 		log.Printf("Error during checking auth `%s`: %s", req.GetAuth(), err)
@@ -45,6 +47,7 @@ func (a *AntiBruteForceServer) CheckAuth(ctx context.Context, req *api.CheckAuth
 	}, nil
 }
 
+// AddToWhiteList gRPC wrapper for AddToWhiteList method
 func (a *AntiBruteForceServer) AddToWhiteList(ctx context.Context, req *api.AddToWhiteListRequest) (*api.AddToWhiteListResponse, error) {
 	_, n, err := net.ParseCIDR(req.GetNet())
 	if err != nil {
@@ -67,6 +70,7 @@ func (a *AntiBruteForceServer) AddToWhiteList(ctx context.Context, req *api.AddT
 	return &api.AddToWhiteListResponse{}, nil
 }
 
+// AddToBlackList gRPC wrapper for AddToBlackList method
 func (a *AntiBruteForceServer) AddToBlackList(ctx context.Context, req *api.AddToBlackListRequest) (*api.AddToBlackListResponse, error) {
 	_, n, err := net.ParseCIDR(req.GetNet())
 	if err != nil {
@@ -89,6 +93,7 @@ func (a *AntiBruteForceServer) AddToBlackList(ctx context.Context, req *api.AddT
 	return &api.AddToBlackListResponse{}, nil
 }
 
+// DeleteFromWhiteList gRPC wrapper for DeleteFromWhiteList method
 func (a *AntiBruteForceServer) DeleteFromWhiteList(ctx context.Context, req *api.DeleteFromWhiteListRequest) (*api.DeleteFromWhiteListResponse, error) {
 	_, n, err := net.ParseCIDR(req.GetNet())
 	if err != nil {
@@ -111,6 +116,7 @@ func (a *AntiBruteForceServer) DeleteFromWhiteList(ctx context.Context, req *api
 	return &api.DeleteFromWhiteListResponse{}, nil
 }
 
+// DeleteFromBlackList gRPC wrapper for DeleteFromBlackList method
 func (a *AntiBruteForceServer) DeleteFromBlackList(ctx context.Context, req *api.DeleteFromBlackListRequest) (*api.DeleteFromBlackListResponse, error) {
 	_, n, err := net.ParseCIDR(req.GetNet())
 	if err != nil {
@@ -133,12 +139,13 @@ func (a *AntiBruteForceServer) DeleteFromBlackList(ctx context.Context, req *api
 	return &api.DeleteFromBlackListResponse{}, nil
 }
 
+// ResetLimit gRPC wrapper for ResetLimit method
 func (a *AntiBruteForceServer) ResetLimit(ctx context.Context, req *api.ResetLimitRequest) (*api.ResetLimitResponse, error) {
 	ip := net.ParseIP(req.GetIp())
 	if ip == nil {
 		log.Printf("Error during resetting limit for ip `%s`: Invalid IP", req.GetIp())
 		return &api.ResetLimitResponse{
-			Error: errors.ErrInvalidCIDR.Error(),
+			Error: errors.ErrInvalidIP.Error(),
 		}, nil
 	}
 
@@ -156,10 +163,12 @@ func (a *AntiBruteForceServer) ResetLimit(ctx context.Context, req *api.ResetLim
 	return &api.ResetLimitResponse{}, nil
 }
 
+// NewAntiBruteForceServer gRPC server constructor
 func NewAntiBruteForceServer(antiBruteForceService *services.AntiBruteForceService) *AntiBruteForceServer {
 	return &AntiBruteForceServer{AntiBruteForceService: antiBruteForceService}
 }
 
+// Serve gRPC server
 func (a *AntiBruteForceServer) Serve(addr string) error {
 	s := grpc.NewServer(grpc.UnaryInterceptor(grpc_prometheus.UnaryServerInterceptor))
 	go func() {

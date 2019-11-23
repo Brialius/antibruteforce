@@ -5,15 +5,17 @@ import (
 	"log"
 )
 
+// GrpcServerConfig gRPC server configuration struct
 type GrpcServerConfig struct {
 	Host          string
 	Port          string
 	MetricsPort   string
 	LoginLimit    uint64
 	PasswordLimit uint64
-	IpLimit       uint64
+	IPLimit       uint64
 }
 
+// GetGrpcServerConfig Get gRPC server configuration
 func GetGrpcServerConfig() *GrpcServerConfig {
 	log.Println("Configuring server...")
 	viper.SetDefault("grpc-srv-host", "localhost")
@@ -31,6 +33,6 @@ func newGrpcServerConfig() *GrpcServerConfig {
 		MetricsPort:   viper.GetString("metrics-port"),
 		LoginLimit:    viper.GetUint64("login-limit"),
 		PasswordLimit: viper.GetUint64("password-limit"),
-		IpLimit:       viper.GetUint64("ip-limit"),
+		IPLimit:       viper.GetUint64("ip-limit"),
 	}
 }

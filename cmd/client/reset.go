@@ -14,9 +14,9 @@ func resetLimit(ctx context.Context) {
 		log.Println("Login is not set")
 	}
 
-	if grpcConfig.Ip == "" {
+	if grpcConfig.IP == "" {
 		isAbsentParam = true
-		log.Println("Ip is not set")
+		log.Println("IP is not set")
 	}
 
 	if isAbsentParam {
@@ -25,7 +25,7 @@ func resetLimit(ctx context.Context) {
 
 	resp, err := grpcClient.ResetLimit(ctx, &api.ResetLimitRequest{
 		Login: grpcConfig.Login,
-		Ip:    grpcConfig.Ip,
+		Ip:    grpcConfig.IP,
 	})
 
 	if err != nil {
