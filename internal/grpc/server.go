@@ -134,7 +134,26 @@ func (a *AntiBruteForceServer) DeleteFromBlackList(ctx context.Context, req *api
 }
 
 func (a *AntiBruteForceServer) ResetLimit(ctx context.Context, req *api.ResetLimitRequest) (*api.ResetLimitResponse, error) {
-	panic("implement me")
+	ip := net.ParseIP(req.GetIp())
+	if ip == nil {
+		log.Printf("Error during resetting limit for ip `%s`: Invalid IP", req.GetIp())
+		return &api.ResetLimitResponse{
+			Error: errors.ErrInvalidCIDR.Error(),
+		}, nil
+	}
+
+	err := a.AntiBruteForceService.ResetLimit(ctx, req.GetLogin(), &ip)
+	if err != nil {
+		log.Printf("Error during resetting limit for login `%s` and IP `%s`: %s", req.GetLogin(), req.GetIp(), err)
+		if berr, ok := err.(errors.AntiBruteForceError); ok {
+			resp := &api.ResetLimitResponse{
+				Error: string(berr),
+			}
+			return resp, nil
+		}
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	return &api.ResetLimitResponse{}, nil
 }
 
 func NewAntiBruteForceServer(antiBruteForceService *services.AntiBruteForceService) *AntiBruteForceServer {

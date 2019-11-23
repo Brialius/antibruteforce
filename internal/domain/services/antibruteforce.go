@@ -126,6 +126,26 @@ func (a *AntiBruteForceService) DeleteFromBlackList(ctx context.Context, n *net.
 	return err
 }
 
-func (a *AntiBruteForceService) ResetLimit(ctx context.Context, login string, n *net.IPNet) error {
-	panic("implement me")
+func (a *AntiBruteForceService) ResetLimit(ctx context.Context, login string, ip *net.IP) error {
+	b, err := a.BucketStorage.GetBucket(ctx, "login_"+login)
+	if err != nil {
+		if err != errors.ErrBucketNotFound {
+			log.Printf("Can't get bucket `%s`: %s", "login_"+login, err)
+			return err
+		}
+		log.Printf("Bucket `%s` doesn't exist", "login_"+login)
+		return err
+	}
+	b.ResetLimit(ctx)
+	b, err = a.BucketStorage.GetBucket(ctx, "ip_"+ip.String())
+	if err != nil {
+		if err != errors.ErrBucketNotFound {
+			log.Printf("Can't get bucket `%s`: %s", "ip_"+ip.String(), err)
+			return err
+		}
+		log.Printf("Bucket `%s` doesn't exist", "ip_"+ip.String())
+		return err
+	}
+	b.ResetLimit(ctx)
+	return nil
 }
