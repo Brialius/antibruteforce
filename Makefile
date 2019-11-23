@@ -17,6 +17,7 @@ LINT_PATH_WIN := golangci-lint
 LINT_SETUP := curl -sfL "https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh" | sh -s latest
 IMPORT_PATH_WIN := c:\protobuf\include
 
+# -race doesn't work in Windows
 ifneq ($(GOOS), windows)
 	RACE = -race
 	PWD := $(shell pwd)
@@ -93,9 +94,15 @@ integration-tests:
 deploy:
 	docker-compose up -d --build
 
+.PHONY: run
+run: deploy
+
 .PHONY: undeploy
 undeploy:
 	docker-compose down
+
+.PHONY: stop
+stop: undeploy
 
 .PHONY: deploy-tests
 deploy-tests:
