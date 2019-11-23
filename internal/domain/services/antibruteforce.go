@@ -16,14 +16,16 @@ const (
 	inactiveCycles = 2
 )
 
+// AntiBruteForceService struct
 type AntiBruteForceService struct {
 	BucketStorage interfaces.BucketStorage
 	ConfigStorage interfaces.ConfigStorage
 	LoginLimit    uint64
 	PasswordLimit uint64
-	IpLimit       uint64
+	IPLimit       uint64
 }
 
+// NewAntiBruteForceService Constructor for AntiBruteForceService
 func NewAntiBruteForceService(
 	bucketStorage interfaces.BucketStorage, configStorage interfaces.ConfigStorage, loginLimit uint64,
 	passwordLimit uint64, ipLimit uint64) *AntiBruteForceService {
@@ -32,22 +34,23 @@ func NewAntiBruteForceService(
 		ConfigStorage: configStorage,
 		LoginLimit:    loginLimit,
 		PasswordLimit: passwordLimit,
-		IpLimit:       ipLimit,
+		IPLimit:       ipLimit,
 	}
 }
 
+// CheckAuth Method to check limits for Auth
 func (a *AntiBruteForceService) CheckAuth(ctx context.Context, auth *models.Auth) (bool, error) {
-	if !a.ConfigStorage.CheckIP(ctx, auth.IpAddr) {
-		log.Printf("IP address `%s` is blocked", auth.IpAddr)
+	if !a.ConfigStorage.CheckIP(ctx, auth.IPAddr) {
+		log.Printf("IP address `%s` is blocked", auth.IPAddr)
 		return false, nil
 	}
 	res := true
-	ok, err := a.CheckBucketLimit(ctx, "ip_"+auth.IpAddr.String(), a.IpLimit)
+	ok, err := a.CheckBucketLimit(ctx, "ip_"+auth.IPAddr.String(), a.IPLimit)
 	if err != nil {
 		return false, err
 	}
 	if !ok {
-		log.Printf("IP address `%s` requests rate limit is exceeded", auth.IpAddr)
+		log.Printf("IP address `%s` requests rate limit is exceeded", auth.IPAddr)
 		res = false
 	}
 	ok, err = a.CheckBucketLimit(ctx, "login_"+auth.Login, a.LoginLimit)
@@ -69,6 +72,7 @@ func (a *AntiBruteForceService) CheckAuth(ctx context.Context, auth *models.Auth
 	return res, nil
 }
 
+// CheckBucketLimit Method to check limit for particular bucket
 func (a *AntiBruteForceService) CheckBucketLimit(ctx context.Context, id string, rate uint64) (bool, error) {
 	b, err := a.BucketStorage.GetBucket(ctx, id)
 	if err != nil {
@@ -90,6 +94,7 @@ func (a *AntiBruteForceService) CheckBucketLimit(ctx context.Context, id string,
 	return b.CheckLimit(ctx), err
 }
 
+// AddToWhiteList Method to add IP address to Whitelist
 func (a *AntiBruteForceService) AddToWhiteList(ctx context.Context, n *net.IPNet) error {
 	log.Printf("Adding %s to whitelist", n)
 	err := a.ConfigStorage.AddToWhiteList(ctx, n)
@@ -99,6 +104,7 @@ func (a *AntiBruteForceService) AddToWhiteList(ctx context.Context, n *net.IPNet
 	return err
 }
 
+// AddToBlackList Method to add IP address to Blacklist
 func (a *AntiBruteForceService) AddToBlackList(ctx context.Context, n *net.IPNet) error {
 	log.Printf("Adding %s to blacklist", n)
 	err := a.ConfigStorage.AddToBlackList(ctx, n)
@@ -108,6 +114,7 @@ func (a *AntiBruteForceService) AddToBlackList(ctx context.Context, n *net.IPNet
 	return err
 }
 
+// DeleteFromWhiteList Method to delete IP address from Whitelist
 func (a *AntiBruteForceService) DeleteFromWhiteList(ctx context.Context, n *net.IPNet) error {
 	log.Printf("Deleting %s from whitelist", n)
 	err := a.ConfigStorage.DeleteFromWhiteList(ctx, n)
@@ -117,6 +124,7 @@ func (a *AntiBruteForceService) DeleteFromWhiteList(ctx context.Context, n *net.
 	return err
 }
 
+// DeleteFromBlackList Method to add IP address from Blacklist
 func (a *AntiBruteForceService) DeleteFromBlackList(ctx context.Context, n *net.IPNet) error {
 	log.Printf("Deleting %s from blacklist", n)
 	err := a.ConfigStorage.DeleteFromBlackList(ctx, n)
@@ -126,6 +134,7 @@ func (a *AntiBruteForceService) DeleteFromBlackList(ctx context.Context, n *net.
 	return err
 }
 
+// ResetLimit Method to reset limits for login/IP address pair
 func (a *AntiBruteForceService) ResetLimit(ctx context.Context, login string, ip *net.IP) error {
 	b, err := a.BucketStorage.GetBucket(ctx, "login_"+login)
 	if err != nil {

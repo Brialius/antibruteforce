@@ -8,11 +8,13 @@ import (
 	"sync"
 )
 
+// MapBucketStorage Map bucket storage struct
 type MapBucketStorage struct {
 	Buckets map[string]interfaces.Bucket
 	mu      sync.RWMutex
 }
 
+// SaveBucket Method to save bucket into storage
 func (m MapBucketStorage) SaveBucket(ctx context.Context, id string, rateLimit uint64, bucket interfaces.Bucket) error {
 	m.mu.Lock()
 	m.Buckets[id] = bucket
@@ -29,6 +31,7 @@ func (m MapBucketStorage) SaveBucket(ctx context.Context, id string, rateLimit u
 	return nil
 }
 
+// DeleteBucket Method to delete bucket from storage
 func (m MapBucketStorage) DeleteBucket(ctx context.Context, id string) error {
 	_, err := m.GetBucket(ctx, id)
 	if err != nil {
@@ -41,6 +44,7 @@ func (m MapBucketStorage) DeleteBucket(ctx context.Context, id string) error {
 	return nil
 }
 
+// GetBucket Method to get bucket from storage
 func (m MapBucketStorage) GetBucket(ctx context.Context, id string) (interfaces.Bucket, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
@@ -51,8 +55,10 @@ func (m MapBucketStorage) GetBucket(ctx context.Context, id string) (interfaces.
 	return nil, errors.ErrBucketNotFound
 }
 
+// Close Method to close connection to storage (to implement Bucket storage interface)
 func (m MapBucketStorage) Close(ctx context.Context) {}
 
+// NewMapBucketStorage Map bucket storage constructor
 func NewMapBucketStorage() *MapBucketStorage {
 	return &MapBucketStorage{
 		Buckets: map[string]interfaces.Bucket{},

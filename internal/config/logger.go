@@ -5,8 +5,10 @@ import (
 	"log"
 )
 
+// Verbose indicates if log should be verbose or not
 var Verbose bool
 
+// SetLoggerConfig Set logger config
 func SetLoggerConfig() {
 	log.Println("Configuring logger...")
 	viper.AutomaticEnv()

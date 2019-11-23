@@ -19,9 +19,9 @@ func checkAuth(ctx context.Context) {
 		log.Println("Password is not set")
 	}
 
-	if grpcConfig.Ip == "" {
+	if grpcConfig.IP == "" {
 		isAbsentParam = true
-		log.Println("Ip is not set")
+		log.Println("IP is not set")
 	}
 
 	if isAbsentParam {
@@ -32,7 +32,7 @@ func checkAuth(ctx context.Context) {
 		Auth: &api.Auth{
 			Login:    grpcConfig.Login,
 			Password: grpcConfig.Password,
-			Ip:       grpcConfig.Ip,
+			Ip:       grpcConfig.IP,
 		},
 	})
 

@@ -24,6 +24,7 @@ func selectConfigStorage(storageType, dsn string) (interfaces.ConfigStorage, err
 	return nil, errors.Errorf("storage `%s` is not implemented", storageType)
 }
 
+//RootCmd is the root cobra command for server
 var RootCmd = &cobra.Command{
 	Use:   "server",
 	Short: "Run gRPC server",
@@ -54,7 +55,7 @@ var RootCmd = &cobra.Command{
 		defer configStorage.Close(context.Background())
 
 		service := services.NewAntiBruteForceService(storage.NewMapBucketStorage(), configStorage,
-			serverConfig.LoginLimit, serverConfig.PasswordLimit, serverConfig.IpLimit)
+			serverConfig.LoginLimit, serverConfig.PasswordLimit, serverConfig.IPLimit)
 
 		server := grpc.NewAntiBruteForceServer(service)
 		addr := fmt.Sprintf("%s:%s", serverConfig.Host, serverConfig.Port)

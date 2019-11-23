@@ -5,14 +5,16 @@ import (
 	"log"
 )
 
+// GrpcClientConfig gRPC client configuration struct
 type GrpcClientConfig struct {
 	Port     string
 	Host     string
 	Login    string
 	Password string
-	Ip       string
+	IP       string
 }
 
+// GetGrpcClientConfig Get gRPC client config
 func GetGrpcClientConfig() *GrpcClientConfig {
 	log.Println("Configuring client...")
 	viper.SetDefault("grpc-cli-host", "localhost")
@@ -26,6 +28,6 @@ func newGrpcClientConfig() *GrpcClientConfig {
 		Host:     viper.GetString("grpc-cli-host"),
 		Login:    viper.GetString("login"),
 		Password: viper.GetString("password"),
-		Ip:       viper.GetString("ip"),
+		IP:       viper.GetString("ip"),
 	}
 }

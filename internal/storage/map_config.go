@@ -8,6 +8,7 @@ import (
 	"sync"
 )
 
+// MapConfigStorage Map config storage struct
 type MapConfigStorage struct {
 	Whitelist   *models.NetList
 	Blacklist   *models.NetList
@@ -15,6 +16,7 @@ type MapConfigStorage struct {
 	blacklistMu sync.RWMutex
 }
 
+// NewMapConfigStorage Map config storage constructor
 func NewMapConfigStorage() *MapConfigStorage {
 	return &MapConfigStorage{
 		Whitelist:   &models.NetList{Networks: map[string]*net.IPNet{}},
@@ -24,6 +26,7 @@ func NewMapConfigStorage() *MapConfigStorage {
 	}
 }
 
+// CheckIP Method to check IP permissions with white/black lists
 func (m MapConfigStorage) CheckIP(ctx context.Context, ip net.IP) bool {
 	m.whitelistMu.RLock()
 	defer m.whitelistMu.RUnlock()
@@ -45,6 +48,7 @@ func (m MapConfigStorage) CheckIP(ctx context.Context, ip net.IP) bool {
 	return true
 }
 
+// AddToBlackList Method to add IP network to Blacklist
 func (m MapConfigStorage) AddToBlackList(ctx context.Context, n *net.IPNet) error {
 	m.blacklistMu.Lock()
 	m.Blacklist.Networks[n.String()] = n
@@ -52,6 +56,7 @@ func (m MapConfigStorage) AddToBlackList(ctx context.Context, n *net.IPNet) erro
 	return nil
 }
 
+// DeleteFromBlackList Method to delete IP network from Blacklist
 func (m MapConfigStorage) DeleteFromBlackList(ctx context.Context, n *net.IPNet) error {
 	m.blacklistMu.Lock()
 	defer m.blacklistMu.Unlock()
@@ -63,6 +68,7 @@ func (m MapConfigStorage) DeleteFromBlackList(ctx context.Context, n *net.IPNet)
 	return errors.ErrNotFound
 }
 
+// AddToWhiteList Method to add IP network to Whitelist
 func (m MapConfigStorage) AddToWhiteList(ctx context.Context, n *net.IPNet) error {
 	m.whitelistMu.Lock()
 	m.Whitelist.Networks[n.String()] = n
@@ -70,6 +76,7 @@ func (m MapConfigStorage) AddToWhiteList(ctx context.Context, n *net.IPNet) erro
 	return nil
 }
 
+// DeleteFromWhiteList Method to delete IP network from Whitelist
 func (m MapConfigStorage) DeleteFromWhiteList(ctx context.Context, n *net.IPNet) error {
 	m.whitelistMu.Lock()
 	defer m.whitelistMu.Unlock()
@@ -81,4 +88,5 @@ func (m MapConfigStorage) DeleteFromWhiteList(ctx context.Context, n *net.IPNet)
 	return errors.ErrNotFound
 }
 
+// Close Method to close connection to Map config storage (to implement ConfigStorage interface)
 func (m MapConfigStorage) Close(ctx context.Context) {}

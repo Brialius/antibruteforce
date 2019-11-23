@@ -5,6 +5,7 @@ import (
 	"net"
 )
 
+// ConfigStorage Config storage interface
 type ConfigStorage interface {
 	AddToBlackList(ctx context.Context, net *net.IPNet) error
 	DeleteFromBlackList(ctx context.Context, net *net.IPNet) error
