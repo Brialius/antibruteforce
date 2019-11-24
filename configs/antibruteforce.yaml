@@ -1,0 +1,7 @@
+---
+grpc-srv-host: "localhost"
+grpc-srv-port: "8080"
+login-limit: 10
+password-limit: 15
+ip-limit: 20
+verbose: true

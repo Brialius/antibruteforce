@@ -2,6 +2,8 @@ package services
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/base64"
 	"github.com/Brialius/antibruteforce/internal/config"
 	"github.com/Brialius/antibruteforce/internal/domain/errors"
 	"github.com/Brialius/antibruteforce/internal/domain/interfaces"
@@ -75,12 +77,20 @@ func (a *AntiBruteForceService) CheckAuth(ctx context.Context, auth *models.Auth
 		}
 		res = false
 	}
-	ok, err = a.CheckBucketLimit(ctx, "password_"+auth.Password, a.PasswordLimit)
+
+	h := sha256.New()
+	if _, err := h.Write([]byte(auth.Password)); err != nil {
+		log.Printf("Hash counting error: %s", err)
+		return false, err
+	}
+	hashedPwd := base64.URLEncoding.EncodeToString(h.Sum([]byte(nil)))
+
+	ok, err = a.CheckBucketLimit(ctx, "password_"+hashedPwd, a.PasswordLimit)
 	if err != nil {
 		return false, err
 	}
 	if !ok {
-		log.Printf("Password `%s` requests rate limit is exceeded", auth.Password)
+		log.Printf("Password `%s` requests rate limit is exceeded", hashedPwd)
 		res = false
 	}
 	return res, nil

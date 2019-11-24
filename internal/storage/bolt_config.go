@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"fmt"
 	"github.com/Brialius/antibruteforce/internal/domain/errors"
 	bolt "github.com/coreos/bbolt"
 	"log"
@@ -19,22 +20,27 @@ type BoltConfigStorage struct {
 	db *bolt.DB
 }
 
+// AddToBlackList Method to add IP network to Blacklist
 func (b *BoltConfigStorage) AddToBlackList(ctx context.Context, n *net.IPNet) error {
 	return b.addToBucket(n.String(), "", blacklistBucket)
 }
 
+// DeleteFromBlackList Method to delete IP network from Blacklist
 func (b *BoltConfigStorage) DeleteFromBlackList(ctx context.Context, n *net.IPNet) error {
 	return b.deleteFromBucket(n.String(), blacklistBucket)
 }
 
+// AddToWhiteList Method to add IP network to Whitelist
 func (b *BoltConfigStorage) AddToWhiteList(ctx context.Context, n *net.IPNet) error {
 	return b.addToBucket(n.String(), "", whitelistBucket)
 }
 
+// DeleteFromWhiteList Method to delete IP network from Whitelist
 func (b *BoltConfigStorage) DeleteFromWhiteList(ctx context.Context, n *net.IPNet) error {
 	return b.deleteFromBucket(n.String(), whitelistBucket)
 }
 
+// CheckIP Method to check IP permissions with white/black lists
 func (b *BoltConfigStorage) CheckIP(ctx context.Context, ip net.IP) (bool, error) {
 	whitelisted, err := b.containsInList(ip, whitelistBucket)
 	if err != nil {
@@ -55,21 +61,24 @@ func (b *BoltConfigStorage) CheckIP(ctx context.Context, ip net.IP) (bool, error
 }
 
 func (b *BoltConfigStorage) containsInList(ip net.IP, bucket string) (bool, error) {
-	res := false
 	err := b.db.View(func(tx *bolt.Tx) error {
 		bkt := tx.Bucket([]byte(bucket))
 		return bkt.ForEach(func(k, v []byte) error {
-			_, n, e := net.ParseCIDR(string(k))
-			if e != nil {
-				return e
+			_, n, _ := net.ParseCIDR(string(k))
+			if n.Contains(ip) {
+				// Send an error to break the ForEach loop and exit from function
+				return fmt.Errorf("net contains ip")
 			}
-			res = n.Contains(ip)
 			return nil
 		})
 	})
-	return res, err
+	if err != nil {
+		return true, nil
+	}
+	return false, nil
 }
 
+// Close Method to close connection to bolt DB
 func (b *BoltConfigStorage) Close(ctx context.Context) error {
 	return b.db.Close()
 }
@@ -122,6 +131,7 @@ func (b *BoltConfigStorage) isExist(key, bucket string) bool {
 	return true
 }
 
+// NewBoltConfigStorage bolt DB config storage constructor
 func NewBoltConfigStorage(timeout time.Duration, fileName string) (*BoltConfigStorage, error) {
 	db, err := bolt.Open(fileName, 0600, &bolt.Options{Timeout: timeout})
 	if err != nil {
