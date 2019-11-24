@@ -11,6 +11,6 @@ type ConfigStorage interface {
 	DeleteFromBlackList(ctx context.Context, net *net.IPNet) error
 	AddToWhiteList(ctx context.Context, net *net.IPNet) error
 	DeleteFromWhiteList(ctx context.Context, net *net.IPNet) error
-	CheckIP(ctx context.Context, ip net.IP) bool
-	Close(ctx context.Context)
+	CheckIP(ctx context.Context, ip net.IP) (bool, error)
+	Close(ctx context.Context) error
 }

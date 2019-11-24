@@ -13,13 +13,16 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"log"
+	"time"
 )
 
 func selectConfigStorage(storageType, dsn string) (interfaces.ConfigStorage, error) {
 	_ = dsn
 	if storageType == "map" {
-		eventStorage := storage.NewMapConfigStorage()
-		return eventStorage, nil
+		return storage.NewMapConfigStorage()
+	}
+	if storageType == "bolt" {
+		return storage.NewBoltConfigStorage(10*time.Second, dsn)
 	}
 	return nil, errors.Errorf("storage `%s` is not implemented", storageType)
 }

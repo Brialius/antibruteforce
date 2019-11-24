@@ -41,14 +41,21 @@ func NewAntiBruteForceService(
 
 // CheckAuth Method to check limits for Auth
 func (a *AntiBruteForceService) CheckAuth(ctx context.Context, auth *models.Auth) (bool, error) {
-	if !a.ConfigStorage.CheckIP(ctx, auth.IPAddr) {
+	ok, err := a.ConfigStorage.CheckIP(ctx, auth.IPAddr)
+	if err != nil {
+		log.Printf("Can't check IP address `%s`: %s", auth.IPAddr, err)
+		return false, err
+	}
+
+	if !ok {
 		if config.Verbose {
 			log.Printf("IP address `%s` is blocked", auth.IPAddr)
 		}
 		return false, nil
 	}
 	res := true
-	ok, err := a.CheckBucketLimit(ctx, "ip_"+auth.IPAddr.String(), a.IPLimit)
+
+	ok, err = a.CheckBucketLimit(ctx, "ip_"+auth.IPAddr.String(), a.IPLimit)
 	if err != nil {
 		return false, err
 	}
