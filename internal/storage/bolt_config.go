@@ -20,22 +20,27 @@ type BoltConfigStorage struct {
 	db *bolt.DB
 }
 
+// AddToBlackList Method to add IP network to Blacklist
 func (b *BoltConfigStorage) AddToBlackList(ctx context.Context, n *net.IPNet) error {
 	return b.addToBucket(n.String(), "", blacklistBucket)
 }
 
+// DeleteFromBlackList Method to delete IP network from Blacklist
 func (b *BoltConfigStorage) DeleteFromBlackList(ctx context.Context, n *net.IPNet) error {
 	return b.deleteFromBucket(n.String(), blacklistBucket)
 }
 
+// AddToWhiteList Method to add IP network to Whitelist
 func (b *BoltConfigStorage) AddToWhiteList(ctx context.Context, n *net.IPNet) error {
 	return b.addToBucket(n.String(), "", whitelistBucket)
 }
 
+// DeleteFromWhiteList Method to delete IP network from Whitelist
 func (b *BoltConfigStorage) DeleteFromWhiteList(ctx context.Context, n *net.IPNet) error {
 	return b.deleteFromBucket(n.String(), whitelistBucket)
 }
 
+// CheckIP Method to check IP permissions with white/black lists
 func (b *BoltConfigStorage) CheckIP(ctx context.Context, ip net.IP) (bool, error) {
 	whitelisted, err := b.containsInList(ip, whitelistBucket)
 	if err != nil {
@@ -73,6 +78,7 @@ func (b *BoltConfigStorage) containsInList(ip net.IP, bucket string) (bool, erro
 	return false, nil
 }
 
+// Close Method to close connection to bolt DB
 func (b *BoltConfigStorage) Close(ctx context.Context) error {
 	return b.db.Close()
 }
@@ -125,6 +131,7 @@ func (b *BoltConfigStorage) isExist(key, bucket string) bool {
 	return true
 }
 
+// NewBoltConfigStorage bolt DB config storage constructor
 func NewBoltConfigStorage(timeout time.Duration, fileName string) (*BoltConfigStorage, error) {
 	db, err := bolt.Open(fileName, 0600, &bolt.Options{Timeout: timeout})
 	if err != nil {
