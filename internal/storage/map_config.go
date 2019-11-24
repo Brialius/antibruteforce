@@ -17,23 +17,23 @@ type MapConfigStorage struct {
 }
 
 // NewMapConfigStorage Map config storage constructor
-func NewMapConfigStorage() *MapConfigStorage {
+func NewMapConfigStorage() (*MapConfigStorage, error) {
 	return &MapConfigStorage{
 		Whitelist:   &models.NetList{Networks: map[string]*net.IPNet{}},
 		Blacklist:   &models.NetList{Networks: map[string]*net.IPNet{}},
 		whitelistMu: sync.RWMutex{},
 		blacklistMu: sync.RWMutex{},
-	}
+	}, nil
 }
 
 // CheckIP Method to check IP permissions with white/black lists
-func (m MapConfigStorage) CheckIP(ctx context.Context, ip net.IP) bool {
+func (m MapConfigStorage) CheckIP(ctx context.Context, ip net.IP) (bool, error) {
 	m.whitelistMu.RLock()
 	defer m.whitelistMu.RUnlock()
 
 	for _, value := range m.Whitelist.Networks {
 		if value.Contains(ip) {
-			return true
+			return true, nil
 		}
 	}
 
@@ -42,10 +42,10 @@ func (m MapConfigStorage) CheckIP(ctx context.Context, ip net.IP) bool {
 
 	for _, value := range m.Blacklist.Networks {
 		if value.Contains(ip) {
-			return false
+			return false, nil
 		}
 	}
-	return true
+	return true, nil
 }
 
 // AddToBlackList Method to add IP network to Blacklist
@@ -89,4 +89,4 @@ func (m MapConfigStorage) DeleteFromWhiteList(ctx context.Context, n *net.IPNet)
 }
 
 // Close Method to close connection to Map config storage (to implement ConfigStorage interface)
-func (m MapConfigStorage) Close(ctx context.Context) {}
+func (m MapConfigStorage) Close(ctx context.Context) error { return nil }

@@ -44,6 +44,7 @@ test: ## Run all the tests
 
 .PHONY: lint
 lint: ## Run all the linters
+	golint ./...
 	$(LINT_PATH) run $(LINTERFLAGS) cmd/client
 	$(LINT_PATH) run $(LINTERFLAGS) cmd/server
 

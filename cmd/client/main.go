@@ -54,13 +54,13 @@ var RootCmd = &cobra.Command{
 			checkAuth(ctx)
 		case "reset":
 			resetLimit(ctx)
-		case "allow":
+		case "add-to-whitelist":
 			addToWhiteList(ctx)
-		case "disallow":
+		case "del-from-whitelist":
 			deleteFromWhiteList(ctx)
-		case "block":
+		case "add-to-blacklist":
 			addToBlackList(ctx)
-		case "unblock":
+		case "del-from-blacklist":
 			deleteFromBlackList(ctx)
 		}
 	},
