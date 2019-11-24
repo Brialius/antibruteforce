@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"fmt"
 	"github.com/Brialius/antibruteforce/internal/domain/errors"
 	bolt "github.com/coreos/bbolt"
 	"log"
@@ -55,19 +56,21 @@ func (b *BoltConfigStorage) CheckIP(ctx context.Context, ip net.IP) (bool, error
 }
 
 func (b *BoltConfigStorage) containsInList(ip net.IP, bucket string) (bool, error) {
-	res := false
 	err := b.db.View(func(tx *bolt.Tx) error {
 		bkt := tx.Bucket([]byte(bucket))
 		return bkt.ForEach(func(k, v []byte) error {
-			_, n, e := net.ParseCIDR(string(k))
-			if e != nil {
-				return e
+			_, n, _ := net.ParseCIDR(string(k))
+			if n.Contains(ip) {
+				// Send an error to break the ForEach loop and exit from function
+				return fmt.Errorf("net contains ip")
 			}
-			res = n.Contains(ip)
 			return nil
 		})
 	})
-	return res, err
+	if err != nil {
+		return true, nil
+	}
+	return false, nil
 }
 
 func (b *BoltConfigStorage) Close(ctx context.Context) error {

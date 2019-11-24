@@ -8,7 +8,7 @@ import (
 
 // SetConfig Set config file settings and location
 func SetConfig() {
-	if viper.IsSet("config") {
+	if viper.GetString("config") != "" {
 		viper.SetConfigFile(viper.GetString("config"))
 	} else {
 		home, err := homedir.Dir()
@@ -16,12 +16,13 @@ func SetConfig() {
 			log.Fatal(err)
 		}
 		viper.AddConfigPath(home)
+		viper.AddConfigPath(".")
 		viper.SetConfigName("antibruteforce")
 	}
 
 	viper.AutomaticEnv()
 
-	if err := viper.ReadInConfig(); err == nil {
+	if viper.ReadInConfig() == nil {
 		log.Println("Using config file:", viper.ConfigFileUsed())
 	}
 	SetLoggerConfig()
