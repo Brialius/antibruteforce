@@ -14,8 +14,8 @@ type StorageConfig struct {
 // GetStorageConfig Get storage config
 func GetStorageConfig() *StorageConfig {
 	log.Println("Configuring storage...")
-	viper.SetDefault("dsn", "")
-	viper.SetDefault("storage", "map")
+	viper.SetDefault("dsn", "antibruteforce_configdb.bbolt")
+	viper.SetDefault("storage", "bolt")
 	return newDbConfig()
 }
 
