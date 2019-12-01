@@ -12,8 +12,8 @@ import (
 type MapConfigStorage struct {
 	Whitelist   *models.NetList
 	Blacklist   *models.NetList
-	whitelistMu sync.RWMutex
-	blacklistMu sync.RWMutex
+	whitelistMu *sync.RWMutex
+	blacklistMu *sync.RWMutex
 }
 
 // NewMapConfigStorage Map config storage constructor
@@ -21,8 +21,8 @@ func NewMapConfigStorage() (*MapConfigStorage, error) {
 	return &MapConfigStorage{
 		Whitelist:   &models.NetList{Networks: map[string]*net.IPNet{}},
 		Blacklist:   &models.NetList{Networks: map[string]*net.IPNet{}},
-		whitelistMu: sync.RWMutex{},
-		blacklistMu: sync.RWMutex{},
+		whitelistMu: &sync.RWMutex{},
+		blacklistMu: &sync.RWMutex{},
 	}, nil
 }
 

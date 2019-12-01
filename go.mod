@@ -3,6 +3,7 @@ module github.com/Brialius/antibruteforce
 go 1.13
 
 require (
+	github.com/DATA-DOG/godog v0.7.13
 	github.com/coreos/bbolt v1.3.2
 	github.com/golang/protobuf v1.3.2
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0

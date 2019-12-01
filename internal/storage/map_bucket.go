@@ -11,7 +11,7 @@ import (
 // MapBucketStorage Map bucket storage struct
 type MapBucketStorage struct {
 	Buckets map[string]interfaces.Bucket
-	mu      sync.RWMutex
+	mu      *sync.RWMutex
 }
 
 // SaveBucket Method to save bucket into storage
@@ -62,6 +62,6 @@ func (m MapBucketStorage) Close(ctx context.Context) {}
 func NewMapBucketStorage() *MapBucketStorage {
 	return &MapBucketStorage{
 		Buckets: map[string]interfaces.Bucket{},
-		mu:      sync.RWMutex{},
+		mu:      &sync.RWMutex{},
 	}
 }
