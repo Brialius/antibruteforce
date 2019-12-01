@@ -23,7 +23,8 @@ type AntiBruteForceServer struct {
 }
 
 // CheckAuth gRPC wrapper for CheckAuth method
-func (a *AntiBruteForceServer) CheckAuth(ctx context.Context, req *api.CheckAuthRequest) (*api.CheckAuthResponse, error) {
+func (a *AntiBruteForceServer) CheckAuth(ctx context.Context,
+	req *api.CheckAuthRequest) (*api.CheckAuthResponse, error) {
 	apiCheckAuthCounter.WithLabelValues(req.GetAuth().GetIp(), req.GetAuth().GetLogin()).Inc()
 	ip := net.ParseIP(req.GetAuth().GetIp())
 	if ip == nil {
@@ -52,7 +53,8 @@ func (a *AntiBruteForceServer) CheckAuth(ctx context.Context, req *api.CheckAuth
 }
 
 // AddToWhiteList gRPC wrapper for AddToWhiteList method
-func (a *AntiBruteForceServer) AddToWhiteList(ctx context.Context, req *api.AddToWhiteListRequest) (*api.AddToWhiteListResponse, error) {
+func (a *AntiBruteForceServer) AddToWhiteList(ctx context.Context,
+	req *api.AddToWhiteListRequest) (*api.AddToWhiteListResponse, error) {
 	_, n, err := net.ParseCIDR(req.GetNet())
 	if err != nil {
 		log.Printf("Error during adding `%s` to whitelist: %s", req.GetNet(), err)
@@ -75,7 +77,8 @@ func (a *AntiBruteForceServer) AddToWhiteList(ctx context.Context, req *api.AddT
 }
 
 // AddToBlackList gRPC wrapper for AddToBlackList method
-func (a *AntiBruteForceServer) AddToBlackList(ctx context.Context, req *api.AddToBlackListRequest) (*api.AddToBlackListResponse, error) {
+func (a *AntiBruteForceServer) AddToBlackList(ctx context.Context,
+	req *api.AddToBlackListRequest) (*api.AddToBlackListResponse, error) {
 	_, n, err := net.ParseCIDR(req.GetNet())
 	if err != nil {
 		log.Printf("Error during adding `%s` to blacklist: %s", req.GetNet(), err)
@@ -98,7 +101,8 @@ func (a *AntiBruteForceServer) AddToBlackList(ctx context.Context, req *api.AddT
 }
 
 // DeleteFromWhiteList gRPC wrapper for DeleteFromWhiteList method
-func (a *AntiBruteForceServer) DeleteFromWhiteList(ctx context.Context, req *api.DeleteFromWhiteListRequest) (*api.DeleteFromWhiteListResponse, error) {
+func (a *AntiBruteForceServer) DeleteFromWhiteList(ctx context.Context,
+	req *api.DeleteFromWhiteListRequest) (*api.DeleteFromWhiteListResponse, error) {
 	_, n, err := net.ParseCIDR(req.GetNet())
 	if err != nil {
 		log.Printf("Error during deleting `%s` from whitelist: %s", req.GetNet(), err)
@@ -121,7 +125,8 @@ func (a *AntiBruteForceServer) DeleteFromWhiteList(ctx context.Context, req *api
 }
 
 // DeleteFromBlackList gRPC wrapper for DeleteFromBlackList method
-func (a *AntiBruteForceServer) DeleteFromBlackList(ctx context.Context, req *api.DeleteFromBlackListRequest) (*api.DeleteFromBlackListResponse, error) {
+func (a *AntiBruteForceServer) DeleteFromBlackList(ctx context.Context,
+	req *api.DeleteFromBlackListRequest) (*api.DeleteFromBlackListResponse, error) {
 	_, n, err := net.ParseCIDR(req.GetNet())
 	if err != nil {
 		log.Printf("Error during deleting `%s` from blacklist: %s", req.GetNet(), err)
@@ -144,7 +149,8 @@ func (a *AntiBruteForceServer) DeleteFromBlackList(ctx context.Context, req *api
 }
 
 // ResetLimit gRPC wrapper for ResetLimit method
-func (a *AntiBruteForceServer) ResetLimit(ctx context.Context, req *api.ResetLimitRequest) (*api.ResetLimitResponse, error) {
+func (a *AntiBruteForceServer) ResetLimit(ctx context.Context,
+	req *api.ResetLimitRequest) (*api.ResetLimitResponse, error) {
 	ip := net.ParseIP(req.GetIp())
 	if ip == nil {
 		log.Printf("Error during resetting limit for ip `%s`: Invalid IP", req.GetIp())

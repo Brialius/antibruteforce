@@ -73,6 +73,9 @@ func (b *BoltConfigStorage) containsInList(ip net.IP, bucket string) (bool, erro
 		})
 	})
 	if err != nil {
+		if err.Error() != "net contains ip" {
+			return false, err
+		}
 		return true, nil
 	}
 	return false, nil
@@ -125,10 +128,7 @@ func (b *BoltConfigStorage) isExist(key, bucket string) bool {
 		}
 		return nil
 	})
-	if err != nil {
-		return false
-	}
-	return true
+	return err == nil
 }
 
 // NewBoltConfigStorage bolt DB config storage constructor

@@ -16,7 +16,6 @@ type Bucket struct {
 	waitTicksUntilPurge uint64
 	done                chan struct{}
 	mu                  sync.RWMutex
-	once                sync.Once
 	duration            time.Duration
 	inactiveCycles      uint64
 }
@@ -31,24 +30,22 @@ func NewBucket(id string, rateLimit uint64, duration time.Duration, inactiveCycl
 		defer ticker.Stop()
 		for {
 			<-ticker.C
-			b.mu.RLock()
-			if b.waitTicks >= b.waitTicksUntilPurge {
-				b.done <- struct{}{}
-				b.mu.RUnlock()
+			bucket.mu.RLock()
+			if bucket.waitTicks >= b.waitTicksUntilPurge {
+				bucket.done <- struct{}{}
+				bucket.mu.RUnlock()
 				log.Printf("Exit from goroutine for ID: %s", b.ID)
 				return
 			}
-			b.mu.RUnlock()
-			b.mu.Lock()
-			if b.requests > 0 {
-				b.requests--
-				b.waitTicks = 0
-			} else {
-				if b.waitTicks < b.waitTicksUntilPurge {
-					b.waitTicks++
-				}
+			bucket.mu.RUnlock()
+			bucket.mu.Lock()
+			if bucket.requests > 0 {
+				bucket.requests--
+				bucket.waitTicks = 0
+			} else if bucket.waitTicks < bucket.waitTicksUntilPurge {
+				bucket.waitTicks++
 			}
-			b.mu.Unlock()
+			bucket.mu.Unlock()
 		}
 	}(b)
 	return b
