@@ -15,7 +15,7 @@ type Bucket struct {
 	waitTicks           uint64
 	waitTicksUntilPurge uint64
 	done                chan struct{}
-	mu                  sync.RWMutex
+	mu                  *sync.RWMutex
 	duration            time.Duration
 	inactiveCycles      uint64
 }
@@ -23,7 +23,7 @@ type Bucket struct {
 // NewBucket Bucket constructor
 func NewBucket(id string, rateLimit uint64, duration time.Duration, inactiveCycles uint64) *Bucket {
 	b := &Bucket{ID: id, rateLimit: rateLimit, waitTicksUntilPurge: inactiveCycles * rateLimit,
-		done: make(chan struct{}, 1), mu: sync.RWMutex{}, duration: duration, inactiveCycles: inactiveCycles}
+		done: make(chan struct{}, 1), mu: &sync.RWMutex{}, duration: duration, inactiveCycles: inactiveCycles}
 	go func(bucket *Bucket) {
 		log.Printf("Goroutine for ID: %s is created", b.ID)
 		ticker := time.NewTicker(time.Duration(uint64(b.duration) / b.rateLimit))
