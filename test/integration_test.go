@@ -1,4 +1,6 @@
-package integration_tests
+// +build integration
+
+package test
 
 import (
 	"context"

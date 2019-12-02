@@ -89,7 +89,7 @@ release:
 
 .PHONY: integration-tests
 integration-tests:
-	go test -v ./integration_tests
+	go test -v -tags=integration ./test
 
 .PHONY: deploy
 deploy:
