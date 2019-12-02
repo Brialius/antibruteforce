@@ -38,7 +38,7 @@ type apiStruct struct {
 }
 
 const (
-	serviceUrl   = "antibruteforce-service:8080"
+	serviceURL   = "antibruteforce-service:8080"
 	randomString = "random"
 )
 
@@ -241,7 +241,7 @@ func FeatureContext(s *godog.Suite) {
 	a := &apiStruct{}
 	s.BeforeScenario(func(interface{}) {
 		a.resetAt = 0
-		_ = a.thereIsAServer(serviceUrl)
+		_ = a.thereIsAServer(serviceURL)
 	})
 	s.Step(`^there is a server "([^"]*)"$`, a.thereIsAServer)
 	s.Step(`^address "([^"]*)"$`, a.setAddress)
