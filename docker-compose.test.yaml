@@ -9,11 +9,13 @@ services:
     ports:
       - "8080"
     environment:
+      METRICS_PORT: "9001"
       GRPC-SRV-HOST: "0.0.0.0"
       GRPC-SRV-PORT: "8080"
-      DSN: ""
-      STORAGE: "map"
-      VERBOSE: "true"
+      IP-LIMIT: "100"
+      PASSWORD-LIMIT: "50"
+      DSN: "antibruteforce_configdb.bbolt"
+      STORAGE: "bolt"
     command: "/app/server"
     restart: on-failure
 
