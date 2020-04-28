@@ -1,0 +1,8 @@
+kind: pipeline
+name: default
+
+steps:
+  - name: build and test
+    image: golang
+    commands:
+      - make ci
